@@ -1,0 +1,13 @@
+function [gKern, gVarmeans, gVarcovars] = conbiasVardistPsi0Gradient(conbiaskern, vardist, covGrad)
+
+% CONBIASVARDISTPSI0GRADIENT one line description
+
+
+
+%	Copyright (c) 2013 ZhaoJing
+% 	last update 2013-12-24
+
+gKern = covGrad*vardist.numData*biaskern.outputDimension;
+ 
+gVarmeans = zeros(1,prod(size(vardist.means))); 
+gVarcovars = zeros(1,prod(size(vardist.means))); 

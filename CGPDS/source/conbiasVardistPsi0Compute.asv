@@ -1,0 +1,41 @@
+function Psi0 = conbiasVardistPsi0Compute(conbiaskern, vardist)
+
+% CONBIASVARDISTPSI0COMPUTE one line description
+%
+%	Description:
+%
+%	PSI0 = BIASVARDISTPSI0COMPUTE(BIASKERN, VARDIST) description
+%	 Returns:
+%	  PSI0 - conbias kern 计算得出的Psi0
+%	 Arguments:
+%	  BIASKERN - the kernel structure associated with the conbias kernel.可与convolved kern 搭配使用的
+%	  VARDIST - description
+%	
+%	
+%	
+%	
+%
+%	See also
+%	OTHERS
+
+
+%	Copyright (c) 2013 ZhaoJing
+% 	last update 2013-12-24
+
+Psi0 = vardist.numData*conbiaskern.outputDimension*biaskern.variance; 
+%% 为了计算每一维的独立方差
+if isfield(vardist,'chooseD')&& vardist.chooseD 
+    conbiaskern.outputDimension=1;
+end
+%%
+N = size(vardist.means,1);
+D = convolveKern.outputDimension;
+
+
+%% 加入缺失数据情况
+if ~isfield(vardist,'map')|| isempty(vardist.map)
+    vardist.map=ones(N,D);
+end
+    Nvec=sum(vardist.map,1)';
+    k0part=Nvec.*convolveKern.S.^2*sqrt(prod(convolveKern.Lambda_k))./sqrt(prod(sigma,2));% k0part is a vector composing of D elements
+    k0=sum(k0part); 

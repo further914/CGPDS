@@ -1,0 +1,76 @@
+function p=calculatePosteriorLikelihood(model,Testmeans,Testcovars,Yts,index)
+switch model.type
+    case 'varmgplvm'
+        convolveKernTmp=model.kern.comp{1,1};
+        Ainv=model.P1'*model.P1;
+        alpha=Ainv*model.Psi1'*model.m;
+        Z=model.X_u;
+        beta=model.beta;
+        D=convolveKernTmp.outputDimension;
+        Kuu=model.K_uu;
+        
+        Nf=100;
+        Ny=size(Testmeans,1);
+        
+        % Ny=10;
+        for i=1:Ny
+            Xmu=Testmeans(i,:)';
+            Xvar=diag(Testcovars(i,:));
+            
+            Xtests=gsamp(Xmu,Xvar,Nf);
+            for k=1:Nf % number of sample F 
+                Xtest=Xtests(k,:);
+                Kfu=convolveKernComputeKfu(convolveKernTmp,Xtest,Z);
+                Kff=convolveKernComputeKff(convolveKernTmp,Xtest);
+                Fmu=Kfu*alpha;
+                Fvar=Kfu*Ainv*Kfu'/beta+Kff-Kfu*Kuu^-1*Kfu';
+%                 Fvar=Fvar.*(model.scale'*model.scale);
+                Ftest=gsamp(Fmu',Fvar,1);
+                Ymu=Ftest;
+                Yvar=eye(D)/beta;
+                % Rescale the mean
+                Ymu = Ymu.*model.scale;
+
+                % Add the bias back in
+                Ymu = Ymu + model.bias, size(vardistX.means,1), 1);
+                pdf4y(i,k)=mvnpdf(Yts(i,index),Ymu(index),Yvar(index,index).*diag(model.scale(index).^2));
+            end
+        end  
+        p0=mean(pdf4y,2);   
+       
+    case 'vargplvm'
+        kernTmp=model.kern.comp{1,1};
+        Ainv=model.P1'*model.P1;
+        alpha=Ainv*model.Psi1'*model.y;
+        Z=model.X_u;
+        beta=model.beta;
+        D=model.d
+        Kuu=model.K_uu;
+        Nf=100;
+        Ny=size(Testmeans,1);    
+        for i=1:Ny
+            Xmu=Testmeans(i,:)';
+            Xvar=diag(Testcovars(i,:));
+            Xtests=gsamp(Xmu,Xvar,Nf);
+            
+            for k=1:Nf % number of sample F
+                Xtest=Xtests(k,:);
+                Kfu=rbfard2KernCompute(kernTmp,Xtest,Z);
+                Kff=rbfard2KernCompute(kernTmp,Xtest);
+
+                Fmu=Kfu*alpha;
+                Fvar=eye(D)*(Kfu*Ainv*Kfu'/beta+Kff-Kfu*Kuu^-1*Kfu');
+                Ftest=gsamp(Fmu',Fvar,1);
+                Fvar=Fvar.*(model.scale'*model.scale);
+                Ymu=Ftest;
+                Yvar=eye(D)/beta;
+                pdf4y(i,k)=mvnpdf(Yts(i,index),Ymu(index),Yvar(index,index).*diag(model.scale(index).^2));
+
+            end
+        end
+        p0=mean(pdf4y,2);   
+end
+        
+        p=mean(log(p0))
+        
+end

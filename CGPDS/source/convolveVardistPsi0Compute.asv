@@ -1,0 +1,34 @@
+function [k0 k0part]=convolveVardistPsi0Compute(convolveKern, vardist)
+
+% CONVOLVEPSI0COMPUTE description
+% 
+% Description
+
+
+%   last update 2013-07-05 
+%   last update 2013-10-29 
+%   last update 2013-11-05
+%   Copyright (c) ZhaoJing
+
+%fprintf('#Calculating Psi0......\n');
+%%
+
+N = size(vardist.means,1);
+D = convolveKern.outputDimension;
+sigma=repmat(convolveKern.Lambda_k,[D,1])+2*convolveKern.P_d;
+if isfield(vardist,'chooseD')&& vardist.chooseD 
+    vardist.map=ones(N,D);
+end
+%% 加入缺失数据情况
+if ~isfield(vardist,'map')|| isempty(vardist.map)
+    vardist.map=ones(N,D);
+end
+    Nvec=sum(vardist.map,1)';
+    k0part=Nvec.*convolveKern.S.^2*sqrt(prod(convolveKern.Lambda_k))./sqrt(prod(sigma,2));% k0part is a vector composing of D elements
+    k0=sum(k0part);   
+% else
+% %%
+%     k0part=N*convolveKern.S.^2*sqrt(prod(convolveKern.Lambda_k))./sqrt(prod(sigma,2));% k0part is a vector composing of D elements
+%     k0=sum(k0part);
+% end
+

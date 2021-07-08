@@ -1,0 +1,40 @@
+function [gKern, gVarmeans, gVarcovars, gInd] = biasVardistPsi1Gradient(biaskern, vardist, Z, covGrad)
+
+% BIASVARDISTPSI1GRADIENT Compute gradient of bias variational PSI1.
+%
+%	Description:
+%
+%	[GKERN, GVARMEANS, GVARCOVARS, GIND] =
+%	BIASVARDISTPSI1GRADIENT(BIASKERN, VARDIST, Z, COVGRAD) description
+%	here.
+%	 Returns:
+%	  GKERN - 
+%	  GVARMEANS - 
+%	  GVARCOVARS - 
+%	  GIND - 
+%	 Arguments:
+%	  BIASKERN - the kernel structure associated with the bias kernel.
+%	  VARDIST - 
+%	  Z - 
+%	  COVGRAD - 
+%	
+%	
+%
+%	See also
+%	
+
+
+%	Copyright (c) 2013 ZhaoJing
+% 	last update 2013-12-24
+%% 加入缺失数据情况
+if ~isfield(vardist,'map')|| isempty(vardist.map)
+    vardist.map=ones(N,D);
+end
+Nexist=sum(sum(vardist.map,1));% 存在观测数据的个数  
+gKern = sum(sum(ones(vardist.numData*biaskern.outputDimension,size(Z,1)).*covGrad)); 
+
+gVarmeans = zeros(1,prod(size(vardist.means))); 
+
+gInd = zeros(1,prod(size(Z))); 
+
+gVarcovars = zeros(1,prod(size(vardist.covars))); 
